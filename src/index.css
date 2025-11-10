@@ -4,43 +4,85 @@
 
 @layer base {
   :root {
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-geist: 'Geist', system-ui, sans-serif;
-    --font-geist-mono: 'Geist Mono', monospace;
-    --font-mona: 'Mona Sans', system-ui, sans-serif;
-    --font-ibm-plex: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-manrope: 'Manrope', system-ui, sans-serif;
+    --theme: #0ea5e9; /* sky-500 */
+    --theme-500: 14 165 233;
+    --theme-600: 2 132 199;
+    --bg: 10 11 16; /* #0a0b10 */
   }
 
   html {
-    font-family: var(--font-sans);
+    /* Apple-like system stack */
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: rgb(var(--bg));
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased text-white bg-transparent;
   }
 }
 
-/* Custom utility classes for shadcn/ui patterns */
+/* Background layers inspired by premium site aesthetics */
 @layer utilities {
-  .animate-in {
-    animation-name: animateIn;
-    animation-duration: 350ms;
-    --tw-enter-opacity: initial;
-    --tw-enter-scale: initial;
-    --tw-enter-rotate: initial;
-    --tw-enter-translate-x: initial;
-    --tw-enter-translate-y: initial;
+  /* Subtle grid */
+  .bg-grid {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse at 40% -20%, rgba(0,0,0,1), rgba(0,0,0,0.25) 60%, transparent 80%),
+                 radial-gradient(ellipse at 60% 120%, rgba(0,0,0,1), rgba(0,0,0,0.25) 60%, transparent 80%);
   }
 
-  .animate-out {
-    animation-name: animateOut;
-    animation-duration: 350ms;
-    --tw-exit-opacity: initial;
-    --tw-exit-scale: initial;
-    --tw-exit-rotate: initial;
-    --tw-exit-translate-x: initial;
-    --tw-exit-translate-y: initial;
+  /* Noise overlay */
+  .bg-noise::before {
+    content: "";
+    position: absolute;
+    inset: -100px;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    background-size: 300px 300px;
+    mix-blend-mode: soft-light;
+  }
+
+  /* Spotlight following cursor using CSS variables */
+  .cursor-spotlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(300px 300px at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.08), transparent 60%);
+    transition: background 120ms ease;
+  }
+
+  /* Soft glow ring */
+  .ring-glow {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 8px 30px rgba(0,0,0,0.35), 0 0 120px rgba(var(--theme-500), 0.22);
+  }
+
+  /* Shimmer text */
+  .text-shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  /* Float animation */
+  .float-y {
+    animation: floatY 9s ease-in-out infinite;
+  }
+  @keyframes floatY { 0%,100%{ transform: translateY(0px);} 50%{ transform: translateY(-14px);} }
+
+  /* Magnetic hover helper */
+  .magnetic {
+    transform: translate3d(var(--tx,0), var(--ty,0), 0);
+    transition: transform 120ms ease;
   }
 }

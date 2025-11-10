@@ -1,6 +1,6 @@
-import React from 'react'
-import { motion } from 'framer-motion'
-import { ArrowRight, Globe2, Sparkles, Map, Rocket, BadgeDollarSign, Building2, BriefcaseBusiness, Activity } from 'lucide-react'
+import React, { useRef } from 'react'
+import { motion, useMotionValue, useTransform } from 'framer-motion'
+import { ArrowRight, Globe2, Sparkles, Map, Rocket, BadgeDollarSign, Building2, BriefcaseBusiness, Activity, Apple } from 'lucide-react'
 import Spline from '@splinetool/react-spline'
 
 const container = {
@@ -10,14 +10,14 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 18, filter: 'blur(6px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 120, damping: 14 } },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring', stiffness: 140, damping: 16 } },
 }
 
-const glow = 'before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-cyan-400/10 before:via-fuchsia-400/10 before:to-emerald-400/10 before:blur-xl before:content-[\'\']'
+const glow = 'before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-sky-500/10 before:via-white/5 before:to-sky-500/10 before:blur-xl before:content-[\'\']'
 
 function Stat({ label, value }) {
   return (
-    <motion.div variants={item} className={`relative rounded-2xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 p-4 ${glow}`}>
+    <motion.div variants={item} className={`relative rounded-2xl bg-white/5 backdrop-blur-md ring-1 ring-white/10 p-4 ring-glow`}>
       <div className="relative z-10">
         <p className="text-xs uppercase tracking-widest text-white/60">{label}</p>
         <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
@@ -26,12 +26,16 @@ function Stat({ label, value }) {
   )
 }
 
-function OpportunityCard({ title, description, icon: Icon, accent }) {
+function OpportunityCard({ title, description, icon: Icon }) {
   return (
-    <motion.div variants={item} whileHover={{ y: -6, scale: 1.02 }} whileTap={{ scale: 0.98 }} className={`group relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900/60 to-slate-900/20 ring-1 ring-white/10 p-6 ${glow}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_200px_at_var(--x,50%)_-20%,rgba(255,255,255,0.12),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+    <motion.div
+      variants={item}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`group relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900/70 to-slate-900/20 ring-1 ring-white/10 p-6 ${glow} cursor-spotlight`}
+    >
       <div className="relative z-10 flex items-start gap-4">
-        <div className={`rounded-2xl p-3 ring-1 ring-white/10 bg-gradient-to-br ${accent} text-white shadow-lg shadow-black/30`}>
+        <div className={`rounded-2xl p-3 ring-1 ring-white/10 bg-gradient-to-br from-sky-500/30 to-sky-400/10 text-white shadow-lg shadow-black/30`}>
           <Icon className="size-6" />
         </div>
         <div className="flex-1">
@@ -48,16 +52,52 @@ function OpportunityCard({ title, description, icon: Icon, accent }) {
 }
 
 function App() {
+  const rootRef = useRef(null)
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const rotate = useTransform(mx, [0, 1], [-1.5, 1.5])
+
+  const onMouseMove = (e) => {
+    const rect = rootRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+    mx.set(x)
+    my.set(y)
+    if (rootRef.current) {
+      rootRef.current.style.setProperty('--mx', `${e.clientX - rect.left}px`)
+      rootRef.current.style.setProperty('--my', `${e.clientY - rect.top}px`)
+    }
+  }
+
   return (
-    <div className="min-h-screen w-full bg-[#0a0b10] text-white">
+    <div ref={rootRef} onMouseMove={onMouseMove} className="min-h-screen w-full relative bg-[rgb(var(--bg))] text-white bg-grid bg-noise">
+      {/* NAV */}
+      <header className="sticky top-0 z-40 backdrop-blur border-b border-white/10 bg-black/20">
+        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-md bg-gradient-to-br from-white/80 to-white/40 ring-1 ring-white/30 grid place-items-center">
+              <Apple className="size-4 text-black/80" />
+            </div>
+            <span className="text-sm font-semibold tracking-tight text-white">Planet Opportunities</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-white/70">
+            <a href="#explore" className="hover:text-white">Explore</a>
+            <a href="#story" className="hover:text-white">Story</a>
+            <a href="#promise" className="hover:text-white">Promise</a>
+            <a href="/test" className="rounded-full px-3 py-1.5 bg-white text-slate-900 font-medium">Status</a>
+          </nav>
+        </div>
+      </header>
+
       {/* HERO */}
-      <section className="relative h-[88vh] w-full overflow-hidden">
+      <section className="relative h-[90vh] w-full overflow-hidden">
         {/* Spline 3D Cover */}
         <div className="absolute inset-0">
           <Spline scene="https://prod.spline.design/7m4PRZ7kg6K1jPfF/scene.splinecode" style={{ width: '100%', height: '100%' }} />
         </div>
         {/* Gradient overlay for readability */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(9,9,13,0)_0%,rgba(9,9,13,0.35)_40%,rgba(9,9,13,0.85)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(9,9,13,0)_0%,rgba(9,9,13,0.35)_40%,rgba(9,9,13,0.9)_100%)]" />
 
         {/* Content */}
         <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-6 pb-14">
@@ -75,10 +115,10 @@ function App() {
               Amid the chaos, you deserve clarity.
             </h1>
             <p className="mt-4 text-white/80 text-base md:text-lg leading-relaxed">
-              Think of this as your guide—crafted by makers, for makers—where every grant, every lab, and every residency is not just listed but brought to life. Animated journeys through global opportunities, each link a lifeline for founders and creators weathering the storm.
+              A cinematic map of grants, residencies, jobs, labs and tools — rendered with motion, engineered for focus, and tuned to feel premium.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <a href="#explore" className="inline-flex items-center gap-2 rounded-full bg-white text-slate-900 px-5 py-3 text-sm font-semibold shadow-lg shadow-black/20 transition hover:bg-slate-100">
+              <a href="#explore" className="inline-flex magnetic items-center gap-2 rounded-full bg-white text-slate-900 px-5 py-3 text-sm font-semibold shadow-lg shadow-black/20 transition hover:bg-slate-100">
                 Explore the map <ArrowRight className="size-4" />
               </a>
               <a href="/test" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold ring-1 ring-white/20 transition hover:bg-white/15">
@@ -99,7 +139,7 @@ function App() {
       {/* STORY SECTIONS */}
       <section id="explore" className="relative mx-auto max-w-7xl px-6 py-16">
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7 }} className="mb-10 flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-500" />
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-white/80 to-white/30 ring-1 ring-white/30" />
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">A living map of what’s possible</h2>
         </motion.div>
 
@@ -108,41 +148,35 @@ function App() {
             title="Grants"
             description="Urgent funds and catalytic capital. Filter by region, deadline, and focus area."
             icon={BadgeDollarSign}
-            accent="from-emerald-500/30 to-teal-400/10"
           />
           <OpportunityCard
             title="Residencies"
             description="Homes for your next chapter—creative labs, research fellowships, and maker residencies."
             icon={Building2}
-            accent="from-fuchsia-500/30 to-violet-400/10"
           />
           <OpportunityCard
             title="Jobs & Fellowships"
             description="Roles across climate, AI, arts, biotech, and more—curated for builders."
             icon={BriefcaseBusiness}
-            accent="from-cyan-500/30 to-sky-400/10"
           />
           <OpportunityCard
             title="Layoffs Tracker"
             description="Track market shifts and hiring rebounds across ecosystems to plan your next move."
             icon={Activity}
-            accent="from-rose-500/30 to-orange-400/10"
           />
           <OpportunityCard
             title="Global Labs"
             description="Where ideas scale: accelerators, R&D programs, and innovation hubs."
             icon={Globe2}
-            accent="from-indigo-500/30 to-blue-400/10"
           />
           <OpportunityCard
             title="Launchpad"
             description="Guides, templates, and tools to apply fast—your edge in the noise."
             icon={Rocket}
-            accent="from-amber-500/30 to-lime-400/10"
           />
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="mt-14 overflow-hidden rounded-3xl bg-white/5 p-8 ring-1 ring-white/10 backdrop-blur-md">
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6 }} className="mt-14 overflow-hidden rounded-3xl bg-white/5 p-8 ring-1 ring-white/10 backdrop-blur-md cursor-spotlight">
           <div className="grid items-center gap-8 md:grid-cols-2">
             <div>
               <h3 className="text-xl md:text-2xl font-semibold">Real-time ripples</h3>
@@ -151,24 +185,24 @@ function App() {
               </p>
             </div>
             <div className="relative h-56 w-full overflow-hidden rounded-2xl">
-              <div className="absolute inset-0 animate-pulse rounded-2xl bg-gradient-to-tr from-cyan-500/20 via-fuchsia-500/10 to-emerald-400/20" />
-              <div className="absolute inset-0 bg-[radial-gradient(600px_120px_at_50%_50%,rgba(255,255,255,0.18),transparent_60%)]" />
+              <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(600px_120px_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.18),transparent_60%)]" />
+              <div className="absolute inset-0 animate-pulse rounded-2xl bg-gradient-to-tr from-sky-500/20 via-white/10 to-sky-500/20" />
             </div>
           </div>
         </motion.div>
       </section>
 
       {/* PROMISE SECTION */}
-      <section className="relative mx-auto max-w-7xl px-6 pb-24">
+      <section id="promise" className="relative mx-auto max-w-7xl px-6 pb-24">
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7 }} className="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 ring-1 ring-white/10 p-8 md:p-12 overflow-hidden">
-          <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-3xl" />
-          <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl" />
+          <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
+          <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
           <div className="relative z-10 grid gap-8 md:grid-cols-2">
             <div>
               <h3 className="text-2xl md:text-3xl font-semibold">Your global launchpad</h3>
               <p className="mt-3 text-white/80 leading-relaxed">
-                We know the markets shift, jobs disappear, and the search for stability never ends. So we built more than a directory—we built a living map. Lose yourself in fluid effects, drift through color-powered lists, feel each residency, grant, and job update unfold in real time.
+                We built more than a directory—a living map. Fluid effects, magnetic buttons, and a single theme color keep the UI elegant and focused.
               </p>
               <div className="mt-6 inline-flex items-center gap-3 rounded-full bg-white text-slate-900 px-5 py-3 text-sm font-semibold shadow-lg shadow-black/20">
                 Start exploring <Map className="size-4" />
@@ -176,13 +210,13 @@ function App() {
             </div>
             <ul className="space-y-3">
               {[
-                'High-animation interface that guides, not distracts',
-                'Comprehensive, global, always-free listings',
+                'Apple-like minimalism with premium motion',
+                'One theme color for consistent brand feel',
                 'Narrative design that reassures and empowers',
                 'Realtime context: deadlines, shifts, signals',
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3">
-                  <div className="mt-1 size-2 rounded-full bg-gradient-to-r from-cyan-400 to-fuchsia-500" />
+                  <div className="mt-1 size-2 rounded-full bg-white/60" />
                   <span className="text-white/80">{t}</span>
                 </li>
               ))}
@@ -192,10 +226,9 @@ function App() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/10 py-8 text-center text-white/60">
-        <p>
-          Built for founders and creators. Every card a chance. Every ripple a signal.
-        </p>
+      <footer className="relative border-t border-white/10 py-10 text-center text-white/60">
+        <div className="absolute inset-x-0 -top-10 h-10 bg-gradient-to-b from-white/10 to-transparent" />
+        <p className="text-xs tracking-wide">Built for founders and creators. Every card a chance. Every ripple a signal.</p>
       </footer>
     </div>
   )
